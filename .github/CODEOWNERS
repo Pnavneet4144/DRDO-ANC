@@ -1,0 +1,5 @@
+# Either owner can review changes to any file
+* @RishiSingh3075 @naveen-verma18
+
+# Either owner can review changes to this file
+/.github/CODEOWNERS @RishiSingh3075 @naveen-verma18

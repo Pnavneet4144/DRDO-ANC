@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>ANC Runs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>body{font-family:sans-serif;margin:16px}table{border-collapse:collapse;margin:8px 0}
+    th,td{border:1px solid #888;padding:4px 8px;text-align:right}th{cursor:pointer}
+    .best{background:#c8f0c8}</style></head><body>
+<h1>DRDO-ANC runs</h1>
+<p>Click a metric to sort (best first, click again to flip). Tick two or more runs, then Compare.</p>
+<button id="cmp">Compare</button> <span id="msg"></span>
+<table id="t"></table><h2>Comparison</h2><table id="c"></table>
+<script>
+    const M = ["snr", "si_snr", "ssnr", "stoi", "pesq", "latency_ms", "rtf"];
+    const dir = {};
+    function cell(tr, text, tag) {
+        const e = document.createElement(tag || "td"); e.textContent = text; tr.appendChild(e); return e;
+    }
+    async function load(sortBy) {
+        let url = "/api/runs";
+        if (sortBy) url += "?sortBy=" + sortBy + (dir[sortBy] ? "&order=" + dir[sortBy] : "");
+        const runs = await (await fetch(url)).json();
+        const t = document.getElementById("t"); t.replaceChildren();
+        const h = t.insertRow(); cell(h, "pick", "th"); cell(h, "name", "th"); cell(h, "method", "th");
+        M.forEach(m => {
+            cell(h, m, "th").onclick = () => {
+                dir[m] = dir[m] === undefined ? "" : (dir[m] === "asc" ? "desc" : "asc"); load(m);
+            };
+        });
+        runs.forEach(r => {
+            const tr = t.insertRow();
+            const box = document.createElement("input"); box.type = "checkbox"; box.value = r.name;
+            cell(tr, "").appendChild(box); cell(tr, r.name); cell(tr, r.method);
+            M.forEach(m => cell(tr, r[m]));
+        });
+    }
+    document.getElementById("cmp").onclick = async () => {
+        const names = [...document.querySelectorAll("#t input:checked")].map(b => b.value);
+        const res = await fetch("/api/runs/compare?" + names.map(n => "names=" + encodeURIComponent(n)).join("&"));
+        const msg = document.getElementById("msg"), c = document.getElementById("c");
+        c.replaceChildren(); msg.textContent = "";
+        if (!res.ok) { msg.textContent = "Pick two or more runs."; return; }
+        const data = await res.json();
+        const h = c.insertRow(); cell(h, "name", "th"); M.forEach(m => cell(h, m, "th"));
+        data.runs.forEach(r => {
+            const tr = c.insertRow(); cell(tr, r.name);
+            M.forEach(m => { const td = cell(tr, r[m]); if (data.best[m] === r.name) td.className = "best"; });
+        });
+    };
+    load();
+</script></body></html>

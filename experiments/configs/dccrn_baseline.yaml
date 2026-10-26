@@ -1,0 +1,14 @@
+# DCCRN baseline experiment configuration
+# See docs/INTERFACES.md for schema: name, method, seed, dataset_version, params
+
+name: dccrn_baseline
+method: dccrn
+seed: 42
+dataset_version: prototype   # No frozen dataset-v1 exists yet; see DRDO_ANC_P1_Dataset_Handoff_Guide.md
+
+params:
+  model: dccrn
+  lr: 0.001
+  batch_size: 8
+  epochs: 50
+  device: null               # auto-select (CUDA if available, else CPU)

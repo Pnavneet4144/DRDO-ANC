@@ -1,0 +1,14 @@
+[project]
+name = "drdo-anc"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+[tool.setuptools]
+packages = ["ai_engine", "common", "signal_processing"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
